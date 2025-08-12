@@ -21,6 +21,14 @@ JOB_DEFINITION_ARN_HOMELETTE=os.getenv('JOB_DEFINITION_ARN_HOMELETTE')
 JOB_DEFINITION_ARN_MUSITE=os.getenv('JOB_DEFINITION_ARN_MUSITE')
 JOB_DEFINITION_ARN_GNINA=os.getenv('JOB_DEFINITION_ARN_GNINA')
 JOB_DEFINITION_ARN_GAN=os.getenv('JOB_DEFINITION_ARN_GAN')
+JOB_DEFINITION_ARN_BLOOD_TEST=os.getenv('JOB_DEFINITION_ARN_BLOOD_TEST')
+JOB_DEFINITION_ARN_URL_DOWNLOAD=os.getenv('JOB_DEFINITION_ARN_URL_DOWNLOAD')
+JOB_DEFINITION_ARN_VEP_ENSEMBLE=os.getenv('JOB_DEFINITION_ARN_VEP_ENSEMBLE')
+JOB_DEFINITION_ARN_BAM_PROCESSING=os.getenv('JOB_DEFINITION_ARN_BAM_PROCESSING')
+JOB_DEFINITION_ARN_FASTQ_PROCESSING=os.getenv('JOB_DEFINITION_ARN_FASTQ_PROCESSING')
+JOB_DEFINITION_ARN_MICROBIOME=os.getenv('JOB_DEFINITION_ARN_MICROBIOME')
+JOB_DEFINITION_ARN_GENETIC_ANNOTATION=os.getenv('JOB_DEFINITION_ARN_GENETIC_ANNOTATION')
+JOB_DEFINITION_ARN_GENETIC=os.getenv('JOB_DEFINITION_ARN_GENETIC')
 
 
 AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY_ID')
@@ -79,7 +87,7 @@ GLYCANS =    {
             "Neu5Ac4Ac(a2-3)Gal(b1-4)[Fuc(a1-3)]GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)CO)O[C@@](O[C@H]2[C@@H](O)[C@@H](CO)O[C@@H](O[C@H]3[C@H](O[C@@H]4O[C@@H](C)[C@@H](O)[C@@H](O)[C@@H]4O)[C@@H](NC(C)=O)CO[C@@H]3CO)[C@@H]2O)(C(=O)O(*))C[C@@H]1OC(C)=O",
             "Neu5Ac(a2-3)Gal(b1-4)Fuc(a1-3)GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)CO)O[C@@](O[C@H]2[C@@H](O)[C@@H](CO)O[C@@H](O[C@H]3[C@@H](O)[C@H](O)[C@H](O[C@H]4[C@H](O)[C@@H](CO)OC[C@@H]4NC(C)=O)O[C@H]3C)[C@@H]2O)(C(=O)O(*))C[C@@H]1O",
             "Neu5Ac9Ac(a2-3)Gal(b1-4)GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)COC(C)=O)O[C@@](O[C@H]2[C@@H](O)[C@@H](CO)O[C@@H](O[C@H]3[C@H](O)[C@@H](NC(C)=O)CO[C@@H]3CO)[C@@H]2O)(C(=O)O(*))C[C@@H]1O",
-            "Neu5Ac7Ac(a2-3)Gal(b1-4)GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](OC(C)=O)[C@H](O)CO)O[C@@](O[C@H]2[C@@H](O)[C@@H](CO)O[C@@H](O[C@H]3[C@H](O)[C@@H](NC(C)=O)CO[C@@H]3CO)[C@@H]2O)(C(=O)O(*))C[C@@H]1O",
+            "Neu5Ac7Ac(a2-3)Gal(b1-4)GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](OC(C)=O)[C@H](O)CO)O[C@@](O[C@H]2[C@@H](O)[C@@H](CO)O[C@H](O[C@H]3[C@H](O)[C@@H](NC(C)=O)CO[C@@H]3CO)[C@@H]2O)(C(=O)O(*))C[C@@H]1O",
             "Neu5Ac(a2-6)[Fuc(a1-2)]Gal(b1-4)GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)CO)O[C@@](OC[C@H]2O[C@@H](O[C@H]3[C@H](O)[C@@H](NC(C)=O)CO[C@@H]3CO)[C@H](O[C@@H]3O[C@@H](C)[C@@H](O)[C@@H](O)[C@@H]3O)[C@@H](O)[C@H]2O)(C(=O)O(*))C[C@@H]1O",
             "Neu5Ac(a2-3)Gal(a1-3)GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)CO)O[C@@](O[C@H]2[C@@H](O)[C@@H](CO)O[C@H](O[C@H]3[C@H](O)[C@@H](CO)OC[C@@H]3NC(C)=O)[C@@H]2O)(C(=O)O(*))C[C@@H]1O",
             "Neu5Ac(a2-3)Glc(b1-3)GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)CO)O[C@@](O[C@@H]2[C@@H](O)[C@H](O[C@H]3[C@H](O)[C@@H](CO)OC[C@@H]3NC(C)=O)O[C@H](CO)[C@H]2O)(C(=O)O(*))C[C@@H]1O",
@@ -121,7 +129,7 @@ GLYCANS =    {
             "Neu5Ac9Ac(a2-6)Gal(b1-4)GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)COC(C)=O)O[C@@](OC[C@H]2O[C@@H](O[C@H]3[C@H](O)[C@@H](NC(C)=O)CO[C@@H]3CO)[C@H](O)[C@@H](O)[C@H]2O)(C(=O)O(*))C[C@@H]1O",
             "Neu5Ac(a2-3)Gal(b1-4)[Fuc(a1-6)]GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)CO)O[C@@](O[C@H]2[C@@H](O)[C@@H](CO)O[C@@H](O[C@H]3[C@H](O)[C@@H](NC(C)=O)CO[C@@H]3CO[C@@H]3O[C@@H](C)[C@@H](O)[C@@H](O)[C@@H]3O)[C@@H]2O)(C(=O)O(*))C[C@@H]1O",
             "Neu5Ac(a2-3)Gal(b1-3)[Neu5Ac(a2-6)][Fuc(a1-4)]GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)CO)O[C@@](OC[C@H]2OC[C@H](NC(C)=O)[C@@H](O[C@@H]3O[C@H](CO)[C@H](O)[C@H](O[C@]4(C(=O)O(*))C[C@H](O)[C@@H](NC(C)=O)[C@H]([C@H](O)[C@H](O)CO)O4)[C@H]3O)[C@@H]2O[C@@H]2O[C@@H](C)[C@@H](O)[C@@H](O)[C@@H]2O)(C(=O)O)C[C@@H]1O",
-            "Neu5Ac(a2-3)Gal(b1-4)[Gal(b1-4)Glc(b1-6)]GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)CO)O[C@@](O[C@H]2[C@@H](O)[C@@H](CO)O[C@@H](O[C@H]3[C@H](O)[C@@H](NC(C)=O)CO[C@@H]3CO[C@@H]3O[C@H](CO)[C@@H](O[C@@H]4O[C@H](CO)[C@H](O)[C@H](O)[C@H]4O)[C@H](O)[C@H]3O)[C@@H]2O)(C(=O)O(*))C[C@@H]1O",
+            "Neu5Ac(a2-3)Gal(b1-4)[Gal(b1-4)Glc(b1-6)]GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)CO)O[C@@](O[C@H]2[C@@H](O)[C@@H](CO)O[C@@H](O[C@H]3[C@H](O)[C@@H](NC(C)=O)CO[C@@H]3CO[C@@H]3O[C@H](CO)[C@H](O[C@@H]4O[C@H](CO)[C@H](O)[C@H](O)[C@H]4O)[C@H](O)[C@H]3O)[C@@H]2O)(C(=O)O(*))C[C@@H]1O",
             "Neu5Ac(a2-6)Glc(b1-4)GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)CO)O[C@@](OC[C@H]2O[C@@H](O[C@H]3[C@H](O)[C@@H](NC(C)=O)CO[C@@H]3CO)[C@H](O)[C@@H](O)[C@@H]2O)(C(=O)O(*))C[C@@H]1O",
             "Neu5Ac(a2-3)Gal2F(b1-4)GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)CO)O[C@@](O[C@H]2[C@@H](O)[C@@H](CO)O[C@@H](O[C@H]3[C@H](O)[C@@H](NC(C)=O)CO[C@@H]3CO)[C@@H]2F)(C(=O)O(*))C[C@@H]1O",
             "Neu5Ac(a2-6)Gal(b1-3)GlcNAc": "CC(=O)N[C@H]1[C@H]([C@H](O)[C@H](O)CO)O[C@@](OC[C@H]2O[C@@H](O[C@H]3[C@H](O)[C@@H](CO)OC[C@@H]3NC(C)=O)[C@H](O)[C@@H](O)[C@H]2O)(C(=O)O(*))C[C@@H]1O",
