@@ -1,0 +1,117 @@
+{
+    "whole_body": {
+        "lymph_node": [],
+        "lymph_vessel": []
+    },
+    "blood": {
+        "blood_vessel": [],
+        "coagulation_system": [],
+        "red_blood_cell": [],
+        "white_blood_cell": []
+    },
+    "endocrine_tissues": {
+        "adrenal_gland": [],
+        "parathyroid_gland": [],
+        "thyroid_gland": [],
+        "lacrimal_apparatus": [],
+        "sweat_gland": [],
+        "hypothalamus": [],
+        "thymus": [],
+        "pituitary_gland": []
+    },
+    "bone_marrow_&_lymphoid_tissues": {
+        "appendix": [],
+        "bone_marrow": [],
+        "lymph_node": [],
+        "spleen": [],
+        "tonsil": []
+    },
+    "respiratory_system": {
+        "bronchus": [],
+        "lung": [],
+        "nasopharynx": [],
+        "larynx": [],
+        "trachea": []
+    },
+    "breast_and_female_reproductive_system": {
+        "breast": [],
+        "cervix": [],
+        "endometrium": [],
+        "fallopian_tube": [],
+        "ovary": [],
+        "placenta": [],
+        "vagina": [],
+        "uterus": []
+    },
+    "gastrointestinal_tract": {
+        "colon": [],
+        "duodenum": [],
+        "rectum": [],
+        "small_intestine": [],
+        "stomach": [],
+        "abdominal_wall": [],
+        "biliary_tract": [],
+        "tongue": [],
+        "pharynx": [],
+        "large_intestine": []
+    },
+    "male_reproductive_system": {
+        "epididymis": [],
+        "prostate": [],
+        "seminal_vesicle": [],
+        "testis": [],
+        "vas_deferens": [],
+        "urethra": []
+    },
+    "proximal_digestive_tract": {
+        "esophagus": [],
+        "oral_mucosa": [],
+        "mouth": []
+    },
+    "liver_&_gallbladder": {
+        "gallbladder": [],
+        "liver": []
+    },
+    "muscle_tissues": {
+        "heart_muscle": [],
+        "skeletal_muscle": [],
+        "smooth_muscle": []
+    },
+    "brain": {
+        "caudate": [],
+        "cerebellum": [],
+        "cerebral_cortex": [],
+        "hippocampus": [],
+        "peripheral_nerve": [],
+        "meninges": [],
+        "cerebrospinal_fluid": [],
+        "olfactory_bulb": []
+    },
+    "kidney_&_urinary_bladder": {
+        "kidney": [],
+        "urinary_bladder": []
+    },
+    "pancreas": {
+        "pancreas": []
+    },
+    "skin": {
+        "skin": []
+    },
+    "connective_&_soft_tissue": {
+        "adipose_tissue": [],
+        "soft_tissue": []
+    },
+    "head": {
+        "eye": [],
+        "ear": [],
+        "chin": [],
+        "cheek": [],
+        "mouth": [],
+        "nose": []
+    },
+    "heart": {
+        "heart_muscle": [],
+        "heart_valve": [],
+        "aorta": []
+    }
+}

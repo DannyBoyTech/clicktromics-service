@@ -1,0 +1,13 @@
+.DS_Store
+.dockerignore
+.gitlab-ci.yml
+.git
+env/
+.gitignore
+Dockerfile
+docker-compose.yml
+tests
+*__pycache__*
+*.log
+*.state
+*IOO*

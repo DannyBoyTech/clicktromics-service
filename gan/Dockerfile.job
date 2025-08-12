@@ -1,0 +1,14 @@
+# Start from a Miniconda base image
+FROM cosmos9526/peptide-gan:latest
+
+RUN pip install  boto3
+
+COPY app.py /workspace/app.py
+COPY entrypoint.sh /workspace/entrypoint.sh
+
+COPY . /workspace/
+    
+# Make the entrypoint script executable
+RUN chmod +x /workspace/entrypoint.sh
+
+ENTRYPOINT ["/workspace/entrypoint.sh"]

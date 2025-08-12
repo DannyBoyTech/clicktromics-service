@@ -1,0 +1,68 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: redis_clicktomics
+    volumes:
+      - redis-data:/data
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    entrypoint: >
+      sh -c "exec redis-server --requirepass \"$REDIS_PASSWORD\" --save 30 1"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - app-network
+
+  api:
+    build: .
+    container_name: clicktromics-service
+    ports:
+      - "${API_PORT:-7007}:8000"
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+      - dt-file-backup:/data
+    env_file: ".env"
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - app-network
+      - pharmacogenomics
+    extra_hosts:
+      - "host.docker.internal:host-gateway" 
+
+#celery multi start 2 -l INFO --statedb=/var/run/celery/%n.state
+  celery_workers:
+    build:
+      context: .
+      dockerfile: Dockerfile.supervisord
+    container_name: celery_workers_scale
+    env_file: ".env"
+    volumes:
+      - .:/app
+      -  /var/run/docker.sock:/var/run/docker.sock
+      - dt-file-backup:/data
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway" 
+
+networks:
+  app-network:
+    driver: bridge
+  pharmacogenomics:
+    external: true
+
+volumes:
+  redis-data:
+    driver: local
+  dt-file-backup:
+    external: true
