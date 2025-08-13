@@ -65,6 +65,7 @@ from src.api.jobs.microbiome import router as microbiome_route
 from src.api.jobs.genetic_annotation import router as genetic_annotation_route
 from src.api.jobs.genetic import router as genetic_route
 from src.api.jobs.url_download import router as url_download_route
+from src.api.jobs.gan import router as gan_router
 from src.api.jobs import router as job_api_router
 
 
@@ -96,6 +97,7 @@ job_router.include_router(microbiome_route)
 job_router.include_router(genetic_annotation_route)
 job_router.include_router(genetic_route)
 job_router.include_router(url_download_route)
+job_router.include_router(gan_router)
 job_router.include_router(job_api_router)
 
 api_router.include_router(job_router)

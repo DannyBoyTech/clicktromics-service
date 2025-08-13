@@ -14,6 +14,31 @@ from src.logger import Logger
 log = Logger.get_logger()
 router = APIRouter(prefix="", tags=["Job Management"])
 
+@router.get("/info")
+async def get_job_info(
+    job_type: JobTypeEnum = Query(..., description="Name of the job type to get info for"),
+):
+    """Get the information of a specific job type"""
+    try:
+        # This is a placeholder - implement actual job type info logic
+        # In sandbox-BE, this uses PipelineFactory.create() and pipeline.get_info()
+        log.info(f"Getting info for job type: {job_type}")
+        
+        # Return basic info for now
+        info = {
+            "job_type": job_type.value,
+            "description": f"Information about {job_type.value} job type",
+            "supported_formats": [],
+            "estimated_duration": "varies",
+            "resource_requirements": "GPU recommended"
+        }
+        
+        return JSONResponse(content={"status": "success", "data": info}, status_code=200)
+    except Exception as e:
+        error_message = str(e) if str(e) else "Unknown error occurred"
+        log.error(f"Error get_job_info for job type {job_type}: {str(error_message)}")
+        return JSONResponse(content={"status": "error", "message": "Error encountered during processing. Please review the application log for detailed information"}, status_code=500)
+
 @router.get("/status/{job_id}", response_model=JobDocument)
 async def get_job_status(
     job_id: str,

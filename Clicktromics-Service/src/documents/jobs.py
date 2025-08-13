@@ -23,6 +23,7 @@ class JobTypeEnum(str, Enum):
     BAM_PROCESSING = "bam_processing"
     FASTQ_PROCESSING = "fastq_processing"
     GENETIC_ANNOTATION = "genetic_annotation"
+    GAN = "gan"
 
 class JobStatusEnum(str, Enum):
     PENDING = 'PENDING'

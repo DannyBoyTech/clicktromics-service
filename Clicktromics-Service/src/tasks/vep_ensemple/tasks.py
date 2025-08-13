@@ -3,7 +3,6 @@ from src.celery_client import Celery
 from src.redis_client import Redis
 from src.repo.jobs import JobRepo, JobDocument
 from src.helper.aws.s3 import get_s3_service
-from src.celery_client import Celery
 from src.config import LOCAL_STORAGE_PATH, DEFAULT_VOLUME_NAME, DEFAULT_BUCKET_NAME
 from src.documents.jobs import JobStatusEnum
 from src.docker_client import get_docker_client
@@ -11,8 +10,9 @@ from src.helper.file_adapter import get_storage_adapter
 from src.tasks import initialize_job, cleanup_temp_files, execute_docker_job
 
 log = Logger.get_logger()
+tasks = Celery.get_client()
 
-@Celery.task(bind=True)
+@tasks.task(bind=True)
 def run_vep_ensemple_job(self, job_id: str, file_path: str):
     """
     Run VEP ensemble processing job
