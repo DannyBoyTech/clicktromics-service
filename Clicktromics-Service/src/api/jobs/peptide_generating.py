@@ -19,10 +19,10 @@ import tempfile
 import os
 import json
 
-router = APIRouter(prefix="/generate/peptide", tags=["Peptide generating job"])
+router = APIRouter(prefix="/gan", tags=["Peptide generating job"])
 
 @router.post("")
-async def submit_peptide_generating_job(
+async def submitgan_job(
     request: PeptideJobRequest,
     repo: JobRepo = Depends(lambda: JobRepo()),
     s3: S3Service = Depends(get_s3_service),
