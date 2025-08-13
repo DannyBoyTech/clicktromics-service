@@ -12,7 +12,7 @@ from src.helper.aws.batch import submit_job
 from src.helper.aws.s3 import get_s3_service, S3Service
 from src.config import DEFAULT_BUCKET_NAME, JOB_DEFINITION_ARN_GAN, JOB_QUEUE_ARN_GPU, USE_AWS
 from src.tasks.batch.update import update_job_status
-from src.request_model import PeptideJobRequest
+from src.request_model import PeptideJobRequest, JobSuccessResponse, JobErrorResponse, JobData
 from src.tasks.gan import run_gan_job
 from src.helper.file_adapter import get_storage_adapter, StorageAdapter
 import tempfile
@@ -21,7 +21,32 @@ import json
 
 router = APIRouter(prefix="/gan", tags=["Peptide generating job"])
 
-@router.post("")
+@router.post("", 
+    response_model=JobSuccessResponse,
+    responses={
+        200: {"description": "Job submitted successfully", "model": JobSuccessResponse},
+        400: {"description": "Bad request", "model": JobErrorResponse},
+        500: {"description": "Internal server error", "model": JobErrorResponse}
+    },
+    summary="Submit a GAN/Peptide Generation job",
+    description="""
+Submit a long-running background job for GAN-based peptide generation.
+
+### Input Parameters:
+- **peptide_protein_sequence** (`str`): Gene protein sequence with the desired peptide length
+- **peptide_length** (`int`): Length of the peptide to generate (default: 15)
+
+### Behavior:
+- A job is created and stored in the system.
+- Corresponding Celery tasks are chained and executed
+- A unique `job_id` is returned to track the job.
+
+### Responses:
+- `200 OK`: Job successfully submitted.
+- `400 Bad Request`: Invalid input parameters.
+- `500 Internal Server Error`: Server error during processing.
+    """
+)
 async def submitgan_job(
     request: PeptideJobRequest,
     repo: JobRepo = Depends(lambda: JobRepo()),
@@ -96,13 +121,18 @@ async def submitgan_job(
         job.task_id = task.id
         await repo.save(job)
 
-        return JSONResponse(content={"status": "success", "data":{"job_id": job.job_id, "message": "Job submitted successfully"}}, status_code=200)
+        return JobSuccessResponse(
+            data=JobData(
+                job_id=job.job_id,
+                message="Job submitted successfully"
+            )
+        )
     except Exception as e:
         error_message = str(e) or "Unknown error occurred"
         log.error(f"Error in submit_job: {error_message}")
-        return JSONResponse(
-            content={"status": "error", "message": f"Error encountered during processing: {error_message}"},
+        raise HTTPException(
             status_code=500,
+            detail=f"Error encountered during processing: {error_message}"
         )
     finally:
         cleanup_temp_files(

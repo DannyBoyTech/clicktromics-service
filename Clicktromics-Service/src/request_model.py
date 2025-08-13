@@ -82,4 +82,18 @@ class PaginatedResponse(GenericModel, Generic[T]):
     page: int
     page_size: int
     results: List[T]
+
+## Job Response Models ##
+
+class JobData(BaseModel):
+    job_id: str
+    message: str
+
+class JobSuccessResponse(BaseModel):
+    status: str = "success"
+    data: JobData
+
+class JobErrorResponse(BaseModel):
+    status: str = "error"
+    message: str
 ##  ##

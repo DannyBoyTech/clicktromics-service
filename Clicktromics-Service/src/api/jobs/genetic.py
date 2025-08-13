@@ -10,6 +10,7 @@ from src.helper.aws.s3 import get_s3_service, S3Service
 from src.helper.aws.batch import submit_job
 from src.config import JOB_QUEUE_ARN_GPU, DEFAULT_BUCKET_NAME, JOB_DEFINITION_ARN_GENETIC, USE_AWS
 from src.tasks.batch.update import update_job_status
+from src.request_model import JobSuccessResponse, JobErrorResponse, JobData
 from src.tasks.genetic.tasks import run_genetic_job
 from src.logger import Logger
 
@@ -26,24 +27,20 @@ class GeneticAnnotationPipelineType(str, Enum):
     FASTQ2RESULTS = "fastq2results"
 
 @router.post("",
-    summary="Submit a Genetic File Processing Job",
+    response_model=JobSuccessResponse,
+    responses={
+        200: {"description": "Job submitted successfully", "model": JobSuccessResponse},
+        400: {"description": "Bad request", "model": JobErrorResponse},
+        500: {"description": "Internal server error", "model": JobErrorResponse}
+    },
+    summary="Submit a Genetic Processing job",
     description="""
-Submit a long-running background job for processing genetic data from VCF or FASTQ files.  
-This endpoint handles three pipeline types:
-- `vcf2result`: Processes a single `.vcf` or `.vcf.gz` file (Vep → Annotation).
-- `bam2results`: Processes a `.bam` files (Variant Calling BAM → Vep → Annotation).
-- `fastq2results`: Processes a pair of `.fastq` or `.fastq.gz` files (Variant Calling FATSQ → Variant Calling BAM  → Vep → Annotation).
+Submit a long-running background job for genetic file processing.
 
 ### Input Parameters (multipart/form-data):
-- **first_file** (`str`, required): Path or identifier of the first uploaded file.
-  - For `vcf2result`: a `.vcf` or `.vcf.gz` file.
-  - For `bam2results`: a `.bam`.
-  - For `fastq2results`: the first `.fastq` or `.fastq.gz` file.
-- **second_file** (`str`, optional): Only required for `fastq2results`. Second `.fastq` or `.fastq.gz` file.
-- **flag** (`PipelineType`, required): Type of pipeline to execute.
-  - `vcf2result` for VCF-based analysis.
-  - `bam2results` for BAM-based analysis.
-  - `fastq2results` for FASTQ-based analysis.
+- **first_file** (`str`, required): Path or identifier of the first genetic file.
+- **second_file** (`str`, optional): Path or identifier of the second genetic file (if needed).
+- **flag** (`str`, required): Processing flag to determine the type of genetic analysis.
 
 ### Behavior:
 - A job is created and stored in the system.
@@ -52,15 +49,9 @@ This endpoint handles three pipeline types:
 
 ### Responses:
 - `200 OK`: Job successfully submitted.
-  ```json
-  {
-    "status": "success",
-    "data": {
-      "job_id": "<uuid>",
-      "message": "Job submitted successfully"
-    }
-  }
-  """
+- `400 Bad Request`: Invalid input parameters.
+- `500 Internal Server Error`: Server error during processing.
+    """
 )
 async def submit_job(
     first_file: str = Form(...),
@@ -120,12 +111,16 @@ async def submit_job(
         job.task_id = task.id
         await repo.save(job)
 
-        return JSONResponse(content={"status": "success", "data":{"job_id": job.job_id, "message": "Job submitted successfully"}}, status_code=200)
+        return JobSuccessResponse(
+            data=JobData(
+                job_id=job.job_id,
+                message="Job submitted successfully"
+            )
+        )
     except Exception as e:
         error_message = str(e) or "Unknown error occurred"
-        tb = traceback.format_exc()
-        log.error(f"Error in submit_job: {error_message}\nTraceback:\n{tb}")
-        return JSONResponse(
-            content={"status": "error", "message": f"Error encountered during processing: {error_message}"},
+        log.error(f"Error in /genetic: {error_message}")
+        raise HTTPException(
             status_code=500,
+            detail=f"Error encountered during processing: {error_message}"
         ) 

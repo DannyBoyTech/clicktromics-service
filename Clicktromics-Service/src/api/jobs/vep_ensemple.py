@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, HTTPException
 from src.logger import Logger
 
 from fastapi.responses import JSONResponse
@@ -11,12 +11,37 @@ from src.helper.aws.batch import submit_job
 from src.config import JOB_QUEUE_ARN_GPU, DEFAULT_BUCKET_NAME, JOB_DEFINITION_ARN_VEP_ENSEMBLE, USE_AWS
 from src.tasks.batch.update import update_job_status
 from src.tasks.vep_ensemple.tasks import run_vep_ensemple_job
+from src.request_model import JobSuccessResponse, JobErrorResponse, JobData
 
 log = Logger.get_logger()
 
 router = APIRouter(prefix="/vep_ensemple", tags=["Vep Ensemple job"])
 
-@router.post("")
+@router.post("",
+    response_model=JobSuccessResponse,
+    responses={
+        200: {"description": "Job submitted successfully", "model": JobSuccessResponse},
+        400: {"description": "Bad request", "model": JobErrorResponse},
+        500: {"description": "Internal server error", "model": JobErrorResponse}
+    },
+    summary="Submit a VEP Ensemble job",
+    description="""
+Submit a long-running background job for VEP Ensemble processing.
+
+### Input Parameters (multipart/form-data):
+- **file** (`str`, required): Path or identifier of the input file for VEP Ensemble processing.
+
+### Behavior:
+- A job is created and stored in the system.
+- Corresponding Celery tasks are chained and executed
+- A unique `job_id` is returned to track the job.
+
+### Responses:
+- `200 OK`: Job successfully submitted.
+- `400 Bad Request`: Invalid input parameters.
+- `500 Internal Server Error`: Server error during processing.
+    """
+)
 async def submit_job(
     file: str = Form(...),
     repo: JobRepo = Depends(lambda: JobRepo()),
@@ -66,11 +91,16 @@ async def submit_job(
         job.task_id = task.id
         await repo.save(job)
 
-        return JSONResponse(content={"status": "success", "data":{"job_id": job.job_id, "message": "Job submitted successfully"}}, status_code=200)
+        return JobSuccessResponse(
+            data=JobData(
+                job_id=job.job_id,
+                message="Job submitted successfully"
+            )
+        )
     except Exception as e:
         error_message = str(e) or "Unknown error occurred"
-        log.error(f"Error in submit_job: {error_message}")
-        return JSONResponse(
-            content={"status": "error", "message": f"Error encountered during processing: {error_message}"},
+        log.error(f"Error in /vep_ensemple: {error_message}")
+        raise HTTPException(
             status_code=500,
+            detail=f"Error encountered during processing: {error_message}"
         ) 

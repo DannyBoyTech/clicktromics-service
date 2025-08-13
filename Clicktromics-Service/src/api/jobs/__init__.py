@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, HTTPException
 
 import os
 from fastapi.responses import JSONResponse
@@ -10,11 +10,36 @@ from src.celery_client import Celery
 from typing import List
 from src.helper.aws.batch import terminate_job
 from src.logger import Logger
+from src.request_model import JobSuccessResponse, JobErrorResponse, JobData
+import json
 
 log = Logger.get_logger()
 router = APIRouter(prefix="", tags=["Job Management"])
 
-@router.get("/info")
+@router.get("/info",
+    response_model=JobSuccessResponse,
+    responses={
+        200: {"description": "Job information retrieved successfully", "model": JobSuccessResponse},
+        400: {"description": "Bad request", "model": JobErrorResponse},
+        500: {"description": "Internal server error", "model": JobErrorResponse}
+    },
+    summary="Get job type information",
+    description="""
+Get information about a specific job type.
+
+### Query Parameters:
+- **job_type** (`JobTypeEnum`, required): Name of the job type to get info for.
+
+### Behavior:
+- Retrieves information about the specified job type.
+- Returns details about supported formats, estimated duration, and resource requirements.
+
+### Responses:
+- `200 OK`: Job information retrieved successfully.
+- `400 Bad Request`: Invalid job type parameter.
+- `500 Internal Server Error`: Server error during processing.
+    """
+)
 async def get_job_info(
     job_type: JobTypeEnum = Query(..., description="Name of the job type to get info for"),
 ):
@@ -33,11 +58,19 @@ async def get_job_info(
             "resource_requirements": "GPU recommended"
         }
         
-        return JSONResponse(content={"status": "success", "data": info}, status_code=200)
+        return JobSuccessResponse(
+            data=JobData(
+                job_id="info",
+                message=json.dumps(info)
+            )
+        )
     except Exception as e:
         error_message = str(e) if str(e) else "Unknown error occurred"
         log.error(f"Error get_job_info for job type {job_type}: {str(error_message)}")
-        return JSONResponse(content={"status": "error", "message": "Error encountered during processing. Please review the application log for detailed information"}, status_code=500)
+        raise HTTPException(
+            status_code=500,
+            detail="Error encountered during processing. Please review the application log for detailed information"
+        )
 
 @router.get("/status/{job_id}", response_model=JobDocument)
 async def get_job_status(

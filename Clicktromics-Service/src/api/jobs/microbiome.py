@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, HTTPException
 from src.logger import Logger
 
 from fastapi.responses import JSONResponse
@@ -11,6 +11,7 @@ from src.helper.aws.batch import submit_job
 from src.config import JOB_QUEUE_ARN_GPU, DEFAULT_BUCKET_NAME, JOB_DEFINITION_ARN_MICROBIOME, USE_AWS
 from src.tasks.batch.update import update_job_status
 from src.tasks.microbiome.tasks import run_microbiome_job
+from src.request_model import JobSuccessResponse, JobErrorResponse, JobData
 
 log = Logger.get_logger()
 
@@ -23,19 +24,20 @@ class MethodEnum(str, Enum):
     _16S = "16s"
 
 @router.post("",
-    summary="Submit a Microbiome File Processing job",
+    response_model=JobSuccessResponse,
+    responses={
+        200: {"description": "Job submitted successfully", "model": JobSuccessResponse},
+        400: {"description": "Bad request", "model": JobErrorResponse},
+        500: {"description": "Internal server error", "model": JobErrorResponse}
+    },
+    summary="Submit a Microbiome Analysis job",
     description="""
-Submit a long-running background job for processing genetic data from VCF or FASTQ files.  
-This endpoint handles two pipeline types:
-- `shotgun`: Processes a pair of `.fastq` or `.fastq.gz` files (Microbiome SHOTGUN).
-- `16s`: Processes a pair of `.fastq` or `.fastq.gz` files (Microbiome SHOTGUN).
+Submit a long-running background job for microbiome analysis.
 
 ### Input Parameters (multipart/form-data):
-- **file_r1** (`str`, required): the first `.fastq` or `.fastq.gz` file.
-- **file_r2** (`str`, required): the second `.fastq` or `.fastq.gz` file.
-- **method** (`Method`, required): Type of pipeline to execute.
-  - `shotgun`
-  - `16s`
+- **file_r1** (`str`, required): Path or identifier of the first FASTQ file (R1).
+- **file_r2** (`str`, required): Path or identifier of the second FASTQ file (R2).
+- **method** (`str`, required): Analysis method to use for microbiome processing.
 
 ### Behavior:
 - A job is created and stored in the system.
@@ -44,15 +46,9 @@ This endpoint handles two pipeline types:
 
 ### Responses:
 - `200 OK`: Job successfully submitted.
-  ```json
-  {
-    "status": "success",
-    "data": {
-      "job_id": "<uuid>",
-      "message": "Job submitted successfully"
-    }
-  }
-  """
+- `400 Bad Request`: Invalid input parameters.
+- `500 Internal Server Error`: Server error during processing.
+    """
 )
 async def submit_job(
     file_r1: str = Form(...),
@@ -109,11 +105,16 @@ async def submit_job(
         job.task_id = task.id
         await repo.save(job)
 
-        return JSONResponse(content={"status": "success", "data":{"job_id": job.job_id, "message": "Job submitted successfully"}}, status_code=200)
+        return JobSuccessResponse(
+            data=JobData(
+                job_id=job.job_id,
+                message="Job submitted successfully"
+            )
+        )
     except Exception as e:
         error_message = str(e) or "Unknown error occurred"
-        log.error(f"Error in submit_job: {error_message}")
-        return JSONResponse(
-            content={"status": "error", "message": f"Error encountered during processing: {error_message}"},
+        log.error(f"Error in /microbiome: {error_message}")
+        raise HTTPException(
             status_code=500,
+            detail=f"Error encountered during processing: {error_message}"
         ) 
