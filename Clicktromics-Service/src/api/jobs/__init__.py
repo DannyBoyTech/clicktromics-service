@@ -11,6 +11,8 @@ from typing import List
 from src.helper.aws.batch import terminate_job
 from src.logger import Logger
 from src.request_model import JobSuccessResponse, JobErrorResponse, JobData
+from src.auth.dependencies import require_user_context
+from src.documents.profile import AuthProfile
 import json
 
 log = Logger.get_logger()
@@ -42,6 +44,7 @@ Get information about a specific job type.
 )
 async def get_job_info(
     job_type: JobTypeEnum = Query(..., description="Name of the job type to get info for"),
+    current_user: AuthProfile = require_user_context(),
 ):
     """Get the information of a specific job type"""
     try:
@@ -75,7 +78,8 @@ async def get_job_info(
 @router.get("/status/{job_id}", response_model=JobDocument)
 async def get_job_status(
     job_id: str,
-    repo: JobRepo = Depends(lambda: JobRepo())
+    repo: JobRepo = Depends(lambda: JobRepo()),
+    current_user: AuthProfile = require_user_context()
 ):
     """Get the data of a specific job"""
     try:
@@ -97,7 +101,8 @@ async def get_jobs(
     stage_status: str = Query(None, description="Filter by current job stage status"),
     job_type: JobTypeEnum = Query(None, description="Filter by job type"),
     sort_desc: bool = Query(True, description="Sort by timestamp descending"),
-    repo: JobRepo = Depends(lambda: JobRepo())
+    repo: JobRepo = Depends(lambda: JobRepo()),
+    current_user: AuthProfile = require_user_context()
 ):
     """Get the data of jobs"""
     try:
@@ -123,7 +128,8 @@ async def get_jobs(
 @router.put("/{job_id}/cancel")
 async def cancel_task(
     job_id: str,
-    repo: JobRepo = Depends(lambda: JobRepo())
+    repo: JobRepo = Depends(lambda: JobRepo()),
+    current_user: AuthProfile = require_user_context()
 ):
     """Cancel running task"""
     job = await repo.find_by_job_id(

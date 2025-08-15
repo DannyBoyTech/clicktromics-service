@@ -6,7 +6,8 @@ log = Logger.get_logger()
 from fastapi.responses import JSONResponse
 from src.documents.jobs import JobType, JobDocument, JobTypeEnum
 from src.repo.jobs import JobRepo
-from src.documents.profile import AuthProfile, Name
+from src.auth.dependencies import require_user_context
+from src.documents.profile import AuthProfile
 from src.helper.file_adapter import get_storage_adapter, StorageAdapter
 from src.helper.aws.batch import submit_job
 from src.helper.aws.s3 import get_s3_service, S3Service
@@ -23,7 +24,7 @@ async def submit_job(
     file: str = Form(...),
     repo: JobRepo = Depends(lambda: JobRepo()),
     s3: S3Service = Depends(get_s3_service),
-    user : AuthProfile = Depends(lambda: AuthProfile(email="layth@prepaire.com", name=Name(first="Layth", last="")))
+    current_user: AuthProfile = require_user_context()
 ):  
     """
        Submit a long-running process and provide a unique job ID to track the status of the process.
@@ -33,7 +34,7 @@ async def submit_job(
     """
         
     try:
-        job = JobDocument(type=JobType(name=JobTypeEnum.DIFFAB), user_email=user.email)
+        job = JobDocument(type=JobType(name=JobTypeEnum.DIFFAB), user_email=current_user.email)
         log.info(f"Creating Job: {job}")
 
         job.inputs = {

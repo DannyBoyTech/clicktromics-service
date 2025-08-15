@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from src.tasks import cleanup_temp_files
 from src.documents.jobs import JobType, JobDocument, JobTypeEnum
 from src.repo.jobs import JobRepo
-from src.documents.profile import AuthProfile, Name
+from src.documents.profile import AuthProfile
 from src.helper.aws.batch import submit_job
 from src.helper.aws.s3 import get_s3_service, S3Service
 from src.config import DEFAULT_BUCKET_NAME, JOB_DEFINITION_ARN_GAN, JOB_QUEUE_ARN_GPU, USE_AWS
@@ -15,6 +15,7 @@ from src.tasks.batch.update import update_job_status
 from src.request_model import PeptideJobRequest, JobSuccessResponse, JobErrorResponse, JobData
 from src.tasks.gan import run_gan_job
 from src.helper.file_adapter import get_storage_adapter, StorageAdapter
+from src.auth.dependencies import require_user_context
 import tempfile
 import os
 import json
@@ -52,7 +53,7 @@ async def submitgan_job(
     repo: JobRepo = Depends(lambda: JobRepo()),
     s3: S3Service = Depends(get_s3_service),
     adapter: StorageAdapter = Depends(get_storage_adapter),
-    user : AuthProfile = Depends(lambda: AuthProfile(email="layth@prepaire.com", name=Name(first="Layth", last="")))
+    current_user: AuthProfile = require_user_context()
 ):  
     """
        Submit a long-running process and provide a unique job ID to track the status of the process.
@@ -62,7 +63,7 @@ async def submitgan_job(
     """
         
     try:
-        job = JobDocument(type=JobType(name=JobTypeEnum.PEPTIDE), user_email=user.email)
+        job = JobDocument(type=JobType(name=JobTypeEnum.PEPTIDE), user_email=current_user.email)
         log.info(f"Creating Job: {job}")
 
         peptide_length = min(request.peptide_length, 50)

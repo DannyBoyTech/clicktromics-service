@@ -4,7 +4,8 @@ import traceback
 from fastapi.responses import JSONResponse
 from src.documents.jobs import JobType, JobDocument, JobTypeEnum
 from src.repo.jobs import JobRepo
-from src.documents.profile import AuthProfile, Name
+from src.auth.dependencies import require_user_context
+from src.documents.profile import AuthProfile
 from src.helper.file_adapter import get_storage_adapter, StorageAdapter
 from src.helper.aws.s3 import get_s3_service, S3Service
 from src.helper.aws.batch import submit_job
@@ -58,7 +59,7 @@ async def submit_job(
     second_file: Optional[str] = Form(None),
     flag: GeneticAnnotationPipelineType = Form(...),
     repo: JobRepo = Depends(lambda: JobRepo()),
-    user: AuthProfile = Depends(lambda: AuthProfile(email="layth@prepaire.com", name=Name(first="Layth", last=""))),
+    current_user: AuthProfile = require_user_context(),
     adapter: StorageAdapter = Depends(get_storage_adapter),
     s3: S3Service = Depends(get_s3_service),
 ):  
@@ -67,7 +68,7 @@ async def submit_job(
             if not second_file:
                 raise HTTPException(status_code=400, detail=f"second_file should not be empty when selecting {GeneticAnnotationPipelineType.FASTQ2RESULTS.value}")
         
-        job = JobDocument(type=JobType(name=JobTypeEnum.GENETIC), user_email=user.email)
+        job = JobDocument(type=JobType(name=JobTypeEnum.GENETIC), user_email=current_user.email)
         log.info(f"Creating Job: {job}")
 
         job.inputs = {

@@ -6,7 +6,8 @@ from src.config import RCSB_URL, DEFAULT_BUCKET_NAME
 from src.logger import Logger
 from src.request_model import PdbRequest
 from src.helper.aws.s3 import get_s3_service, S3Service
-from src.documents.profile import AuthProfile, Name
+from src.auth.dependencies import require_auth
+from src.documents.profile import AuthProfile
 
 log = Logger.get_logger()
 router = APIRouter(
@@ -18,7 +19,7 @@ router = APIRouter(
 async def download_pdb_by_id(
     request: PdbRequest,
     s3: S3Service = Depends(get_s3_service),
-    user: AuthProfile = Depends(lambda: AuthProfile(email="layth@prepaire.com", name=Name(first="Layth", last="")))
+    current_user: AuthProfile = require_auth()
 ):
     """Download PDB file from rcsb.org by providing PDB ID"""
     
@@ -62,7 +63,7 @@ async def download_pdb_by_id(
 async def upload_pdb_file(
     file: UploadFile = File(...),
     s3: S3Service = Depends(get_s3_service),
-    user: AuthProfile = Depends(lambda: AuthProfile(email="layth@prepaire.com", name=Name(first="Layth", last="")))
+    current_user: AuthProfile = require_auth()
 ):
     """Upload PDB file and save it in S3 to use it later with diffab"""
     try:

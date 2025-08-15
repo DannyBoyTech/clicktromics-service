@@ -4,6 +4,8 @@ from src.helper.aws.s3 import get_s3_service, S3Service
 from src.helper.file_adapter import get_storage_adapter, StorageAdapter
 from src.logger import Logger
 from src.utils import validate_file_type, verify_checksum
+from src.auth.dependencies import require_auth
+from src.documents.profile import AuthProfile
 import json, tempfile, os, traceback
 from typing import Optional
 
@@ -94,6 +96,7 @@ async def upload(
     hash: Optional[str] = Form(None, description="Optional checksum for integrity check"),
     adapter: StorageAdapter = Depends(get_storage_adapter),
     s3: S3Service = Depends(get_s3_service),
+    current_user: AuthProfile = require_auth(),
 ):
     try:
         # Save to temp and verify checksum
@@ -161,6 +164,7 @@ async def download(
     objectname: str,
     background_tasks: BackgroundTasks,
     adapter: StorageAdapter = Depends(get_storage_adapter),
+    current_user: AuthProfile = require_auth(),
 ):
     try:
         with tempfile.NamedTemporaryFile(delete=False) as tf:
@@ -215,6 +219,7 @@ If the file contains valid JSON, it is parsed and returned as JSON; otherwise re
 async def download_content(
     objectname: str,
     adapter: StorageAdapter = Depends(get_storage_adapter),
+    current_user: AuthProfile = require_auth(),
 ):
     temp_path = None
     try:

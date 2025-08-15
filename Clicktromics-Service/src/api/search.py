@@ -19,6 +19,8 @@ from src.helper.aws.s3 import get_s3_service, S3Service
 from src.request_model import SearchOrganRequest, SearchDiseaseRequest, SearchGeneRequest, SearchAntibodyRequest
 from rapidfuzz import process, fuzz
 from src.helper.scrape import AdvancedScraper
+from src.auth.dependencies import require_auth
+from src.documents.profile import AuthProfile
 import asyncio
 import os
 
@@ -29,7 +31,8 @@ router = APIRouter(prefix="/search", tags=["Search"])
 async def search_antibody(
     request_body: SearchAntibodyRequest,
     repo: AntibodyRepo = Depends(lambda: AntibodyRepo()),
-    s3: S3Service = Depends(get_s3_service)
+    s3: S3Service = Depends(get_s3_service),
+    current_user: AuthProfile = require_auth()
 ):
     """Search for antibody in our database"""
     if not request_body.input:
@@ -82,7 +85,8 @@ async def search_antibody(
 @router.get("/diseases/category")
 async def search_diseases_by_category(
     name: str = Query(..., description="Disease categories name"),
-    repo: DiseaseRepo = Depends(lambda: DiseaseRepo())
+    repo: DiseaseRepo = Depends(lambda: DiseaseRepo()),
+    current_user: AuthProfile = require_auth()
 ):
     try:
         if name is None or name == "":
@@ -107,7 +111,8 @@ async def search_diseases_by_category(
 async def search_drugs_by_disease(
     name: str,
     repo: MalacardRepo = Depends(lambda: MalacardRepo()),
-    drug_repo: DrugRepo = Depends(lambda: DrugRepo())
+    drug_repo: DrugRepo = Depends(lambda: DrugRepo()),
+    current_user: AuthProfile = require_auth()
 ):
     try:
         if name is None or name == "":
@@ -146,7 +151,8 @@ async def search_drugs_by_disease(
 async def search_genes_by_disease(
     name: str,
     repo: MalacardRepo = Depends(lambda: MalacardRepo()),
-    antibody_repo: AntibodyRepo = Depends(lambda: AntibodyRepo())
+    antibody_repo: AntibodyRepo = Depends(lambda: AntibodyRepo()),
+    current_user: AuthProfile = require_auth()
 ):
     try:
         if name is None or name == "":

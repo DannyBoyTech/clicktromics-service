@@ -7,7 +7,8 @@ from fastapi.responses import JSONResponse
 from src.documents.jobs import JobType, JobDocument, JobTypeEnum
 from src.repo.jobs import JobRepo
 from src.request_model import BoltzJobRequest
-from src.documents.profile import AuthProfile, Name
+from src.auth.dependencies import require_user_context
+from src.documents.profile import AuthProfile
 from src.helper.file_adapter import get_storage_adapter, StorageAdapter
 from src.helper.aws.s3 import get_s3_service, S3Service
 from src.helper.aws.batch import submit_job
@@ -25,7 +26,7 @@ router = APIRouter(prefix="/boltz", tags=["Boltz job"])
 async def submit_boltz_job(
     request: BoltzJobRequest,
     repo: JobRepo = Depends(lambda: JobRepo()),
-    user : AuthProfile = Depends(lambda: AuthProfile(email="layth@prepaire.com", name=Name(first="Layth", last=""))),
+    current_user: AuthProfile = require_user_context(),
     adapter: StorageAdapter = Depends(get_storage_adapter),
     s3: S3Service = Depends(get_s3_service),
 ):  
@@ -37,7 +38,7 @@ async def submit_boltz_job(
     """
         
     try:
-        job = JobDocument(type=JobType(name=JobTypeEnum.BOLTZ), user_email=user.email)
+        job = JobDocument(type=JobType(name=JobTypeEnum.BOLTZ), user_email=current_user.email)
         log.info(f"Creating Job: {job}")
         
         with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tf:
