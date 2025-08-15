@@ -50,6 +50,7 @@ from src.api.input import router as input_router
 from src.api.upload import router as upload_router
 from src.api.organs import router as organs_router
 from src.api.search import router as search_router
+from src.auth.routes import router as auth_router
 
 from src.api.jobs.boltz import router as boltz_router
 from src.api.jobs.diffab import router as diffab_router
@@ -79,6 +80,7 @@ api_router.include_router(smiles_converter_router)
 api_router.include_router(click_router)
 api_router.include_router(click_pdc_router)
 api_router.include_router(upload_router)
+api_router.include_router(auth_router)
 
 job_router = APIRouter(prefix="/job")
 
