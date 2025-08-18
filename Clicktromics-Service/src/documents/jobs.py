@@ -19,6 +19,11 @@ class JobTypeEnum(str, Enum):
     MICROBIOME = "microbiome"
     ANNOTATION = "annotation"
     GENETIC = "genetic"
+    URL_DOWNLOAD = "url_download"
+    BAM_PROCESSING = "bam_processing"
+    FASTQ_PROCESSING = "fastq_processing"
+    GENETIC_ANNOTATION = "genetic_annotation"
+    GAN = "gan"
 
 class JobStatusEnum(str, Enum):
     PENDING = 'PENDING'

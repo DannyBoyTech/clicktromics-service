@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, HTTPException
 
 import os
 from fastapi.responses import JSONResponse
@@ -10,14 +10,76 @@ from src.celery_client import Celery
 from typing import List
 from src.helper.aws.batch import terminate_job
 from src.logger import Logger
+from src.request_model import JobSuccessResponse, JobErrorResponse, JobData
+from src.auth.dependencies import require_user_context
+from src.documents.profile import AuthProfile
+import json
 
 log = Logger.get_logger()
 router = APIRouter(prefix="", tags=["Job Management"])
 
+@router.get("/info",
+    response_model=JobSuccessResponse,
+    responses={
+        200: {"description": "Job information retrieved successfully", "model": JobSuccessResponse},
+        400: {"description": "Bad request", "model": JobErrorResponse},
+        500: {"description": "Internal server error", "model": JobErrorResponse}
+    },
+    summary="Get job type information",
+    description="""
+Get information about a specific job type.
+
+### Query Parameters:
+- **job_type** (`JobTypeEnum`, required): Name of the job type to get info for.
+
+### Behavior:
+- Retrieves information about the specified job type.
+- Returns details about supported formats, estimated duration, and resource requirements.
+
+### Responses:
+- `200 OK`: Job information retrieved successfully.
+- `400 Bad Request`: Invalid job type parameter.
+- `500 Internal Server Error`: Server error during processing.
+    """
+)
+async def get_job_info(
+    job_type: JobTypeEnum = Query(..., description="Name of the job type to get info for"),
+    current_user: AuthProfile = require_user_context(),
+):
+    """Get the information of a specific job type"""
+    try:
+        # This is a placeholder - implement actual job type info logic
+        # In sandbox-BE, this uses PipelineFactory.create() and pipeline.get_info()
+        log.info(f"Getting info for job type: {job_type}")
+        
+        # Return basic info for now
+        info = {
+            "job_type": job_type.value,
+            "description": f"Information about {job_type.value} job type",
+            "supported_formats": [],
+            "estimated_duration": "varies",
+            "resource_requirements": "GPU recommended"
+        }
+        
+        return JobSuccessResponse(
+            data=JobData(
+                job_id="info",
+                message=json.dumps(info)
+            )
+        )
+    except Exception as e:
+        error_message = str(e) if str(e) else "Unknown error occurred"
+        log.error(f"Error get_job_info for job type {job_type}: {str(error_message)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Error encountered during processing. Please review the application log for detailed information"
+        )
+
 @router.get("/status/{job_id}", response_model=JobDocument)
 async def get_job_status(
     job_id: str,
-    repo: JobRepo = Depends(lambda: JobRepo())
+    repo: JobRepo = Depends(lambda: JobRepo()),
+    current_user: AuthProfile = require_user_context()
 ):
     """Get the data of a specific job"""
     try:
@@ -39,7 +101,8 @@ async def get_jobs(
     stage_status: str = Query(None, description="Filter by current job stage status"),
     job_type: JobTypeEnum = Query(None, description="Filter by job type"),
     sort_desc: bool = Query(True, description="Sort by timestamp descending"),
-    repo: JobRepo = Depends(lambda: JobRepo())
+    repo: JobRepo = Depends(lambda: JobRepo()),
+    current_user: AuthProfile = require_user_context()
 ):
     """Get the data of jobs"""
     try:
@@ -65,7 +128,8 @@ async def get_jobs(
 @router.put("/{job_id}/cancel")
 async def cancel_task(
     job_id: str,
-    repo: JobRepo = Depends(lambda: JobRepo())
+    repo: JobRepo = Depends(lambda: JobRepo()),
+    current_user: AuthProfile = require_user_context()
 ):
     """Cancel running task"""
     job = await repo.find_by_job_id(

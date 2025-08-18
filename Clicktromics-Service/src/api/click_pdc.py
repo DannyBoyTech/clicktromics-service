@@ -3,7 +3,8 @@ from fastapi.responses import JSONResponse
 from src.logger import Logger
 from src.request_model import ClickPDCRequest
 from src.helper.click import ClickPeptide
-from src.documents.profile import AuthProfile, Name
+from src.auth.dependencies import require_user_context
+from src.documents.profile import AuthProfile
 
 logger = Logger.get_logger()
 router = APIRouter(prefix="/click", tags=["Click Chemistry PDC"])
@@ -11,7 +12,7 @@ router = APIRouter(prefix="/click", tags=["Click Chemistry PDC"])
 @router.post("/pdc")
 async def click_generate(
     request: ClickPDCRequest,
-    user : AuthProfile = Depends(lambda: AuthProfile(email="layth@prepaire.com", name=Name(first="Layth", last=""))) 
+    current_user: AuthProfile = require_user_context()
 ):
     """Submit a SMILES string for a drug or peptide or a drugbankid, and the result will be a payload"""
   

@@ -7,6 +7,8 @@ from openbabel import pybel
 import requests
 from src.helper.aws.s3 import get_s3_service, S3Service
 from src.utils import get_remote_file_content, generate_unique_job_id
+from src.auth.dependencies import require_auth
+from src.documents.profile import AuthProfile
 import os, time, base64
 from src.helper.click import fasta_to_peptide_smiles
 
@@ -16,7 +18,10 @@ router = APIRouter(prefix="/smiles-converter", tags=["Smiles Converter"])
 ALLOWED_EXTENSION = ".pdb"  # Only allow PDB files
 
 @router.post('/2d-smi')
-def predict_2d_smi(request: SmilesRequest):
+def predict_2d_smi(
+    request: SmilesRequest,
+    current_user: AuthProfile = require_auth()
+):
     """From SMILES string to a 2D smi data format"""
     if not request.smiles:
         log.info(f"smiles is empty, please provide valid smiles")
@@ -37,7 +42,10 @@ def predict_2d_smi(request: SmilesRequest):
         return JSONResponse(content={"status": "error", "message": "Error encountered during processing. Please review the application log for detailed information"}, status_code=500)
 
 @router.post('/3d-sdf')
-def predict_3d_sdf(request: SmilesRequest):
+def predict_3d_sdf(
+    request: SmilesRequest,
+    current_user: AuthProfile = require_auth()
+):
     """From SMILES string to a 3D sdf data format"""
     if not request.smiles:
         log.info(f"smiles is empty, please provide valid smiles")
@@ -62,6 +70,7 @@ def predict_3d_sdf(request: SmilesRequest):
 def predict_from_pdb_file(
     file_url: str = Form(...),
     s3: S3Service = Depends(get_s3_service),
+    current_user: AuthProfile = require_auth()
 ):
     """Predict SMILES from a pdb file"""
 
@@ -94,6 +103,7 @@ def predict_from_pdb_file(
 @router.post('/to-image')
 def smiles_to_image(
     smiles: str = Form(...),
+    current_user: AuthProfile = require_auth()
 ):
     """Get image from smarts.plus"""
 
@@ -170,6 +180,7 @@ def smiles_to_image(
 @router.post('/from-fasta')
 def sequance_to_smiles(
     sequance: str = Form(...),
+    current_user: AuthProfile = require_auth()
 ):
     """Predict SMILES from a sequance"""
 

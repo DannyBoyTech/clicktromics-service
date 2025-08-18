@@ -4,8 +4,9 @@ from src.logger import Logger
 from src.request_model import ClickADCRequest
 from src.config import LINKERS, SMART_REACTION, GLYCAN_LINKER, GLYCANS
 from src.helper.click import ClickDrug, ClickSPACC
+from src.auth.dependencies import require_user_context
+from src.documents.profile import AuthProfile
 import random
-from src.documents.profile import AuthProfile, Name
 
 logger = Logger.get_logger()
 router = APIRouter(prefix="/click", tags=["Click Chemistry ADC"])
@@ -13,7 +14,7 @@ router = APIRouter(prefix="/click", tags=["Click Chemistry ADC"])
 @router.post("/adc")
 async def click_generate(
     request: ClickADCRequest,
-    user : AuthProfile = Depends(lambda: AuthProfile(email="layth@prepaire.com", name=Name(first="Layth", last=""))) 
+    current_user: AuthProfile = require_user_context()
 ):
     """Submit a SMILES string for a drug or peptide or a drugbankid, and the result will be a payload"""
   

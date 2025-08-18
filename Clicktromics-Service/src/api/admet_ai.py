@@ -1,9 +1,11 @@
 from src.logger import Logger
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from src.request_model import AdmetPredictRequest
 from src.model import get_admet_model, load_admet_model
 from admet_ai import ADMETModel
+from src.auth.dependencies import require_auth
+from src.documents.profile import AuthProfile
 
 log = Logger.get_logger()
 router = APIRouter(prefix="/admet-ai", tags=["ADMET Model"])
@@ -18,7 +20,10 @@ selected_fields = [
 ]
 
 @router.post('/predict')
-def predict(request: AdmetPredictRequest):
+def predict(
+    request: AdmetPredictRequest,
+    current_user: AuthProfile = require_auth()
+):
     """Predict Lipinski, QED, ...etc for a specific smiles using Admet AI"""
     try:
         if not isinstance(get_admet_model(), ADMETModel):

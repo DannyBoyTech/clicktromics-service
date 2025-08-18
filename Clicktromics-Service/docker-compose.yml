@@ -1,4 +1,19 @@
 services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_clicktromics
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: 19BncWeO68Bd2JaaVj
+      MONGO_INITDB_DATABASE: genetiq
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
   redis:
     image: redis:latest
     container_name: redis_clicktomics
@@ -29,6 +44,7 @@ services:
     env_file: ".env"
     depends_on:
       - redis
+      - mongodb
     restart: unless-stopped
     networks:
       - app-network
@@ -49,6 +65,7 @@ services:
       - dt-file-backup:/data
     depends_on:
       - redis
+      - mongodb
     restart: unless-stopped
     networks:
       - app-network
@@ -62,6 +79,8 @@ networks:
     external: true
 
 volumes:
+  mongodb_data:
+    driver: local
   redis-data:
     driver: local
   dt-file-backup:

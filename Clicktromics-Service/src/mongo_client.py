@@ -141,6 +141,27 @@ class Mongo:
         return db['peptides']
     
     @classmethod
+    def get_users_collection(cls) -> AsyncIOMotorCollection:
+        if cls._mongo_client is None:
+            raise ValueError("MongoDB client is not initialized. Call Mongo.initialize() first.")
+        db = cls._mongo_client[MONGO_DATABASE]  
+        return db['users']
+    
+    @classmethod
+    def get_password_reset_collection(cls) -> AsyncIOMotorCollection:
+        if cls._mongo_client is None:
+            raise ValueError("MongoDB client is not initialized. Call Mongo.initialize() first.")
+        db = cls._mongo_client[MONGO_DATABASE]  
+        return db['password_reset_tokens']
+    
+    @classmethod
+    def get_refresh_tokens_collection(cls) -> AsyncIOMotorCollection:
+        if cls._mongo_client is None:
+            raise ValueError("MongoDB client is not initialized. Call Mongo.initialize() first.")
+        db = cls._mongo_client[MONGO_DATABASE]  
+        return db['refresh_tokens']
+    
+    @classmethod
     async def _initialize_client(cls):
         """Initialize the MongoDB client with a standard configuration."""
         cls._mongo_client = AsyncIOMotorClient(
